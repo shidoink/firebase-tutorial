@@ -6,7 +6,20 @@ import {getDocs,collection, addDoc, deleteDoc, updateDoc, doc} from 'firebase/fi
 import {ref, uploadBytes} from 'firebase/storage'
 
 function App() {
-  const [movieList, setMovielist] = useState([])
+  interface Movie{
+    title?: string
+    oscar?: boolean
+    userId?: string
+    id: string
+  }
+  interface File{
+    name: string
+  }
+  
+
+
+
+  const [movieList, setMovielist] = useState<Movie[]>([]);
 
 
   //new movie states
@@ -17,7 +30,7 @@ const [newMovieOscar, setNewMovieOscar] = useState(false)
 const [updatedTitle, setUpdatedTitle]= useState('')
 
 //file upload state
-const [fileUpload, setFileUpload] = useState(null)
+const [fileUpload, setFileUpload] = useState<Blob | null>(null);
 
 
   const movieCollectionRef = collection(db, 'movies')
@@ -27,11 +40,12 @@ const [fileUpload, setFileUpload] = useState(null)
     //set the movie list
     try{
     const data = await getDocs(movieCollectionRef)
-    const filteredData =data.docs.map((doc) =>({
+    const filteredData  =data.docs.map((doc) =>({
       ...doc.data(),
-       id:doc.id
+       id:doc.id,
        
     }));
+    console.log("Filtered Datayeahboi" ,filteredData )
     setMovielist(filteredData)
     //console.log(filteredData);
     } catch (err){
@@ -56,10 +70,13 @@ const onSubmitMovie = async() =>{
 }}
 
 const deleteMovie = async(id:string, )=>{
+  
   const movieDoc= doc(db,'movies', id )
+  await deleteDoc(movieDoc)
+  
   console.log(movieDoc.id)
   
-  await deleteDoc(movieDoc)
+  
   getMovieList();
 }
 
@@ -74,6 +91,7 @@ const getmovieinfo= async(id:string)=>{
 }
 
 const uploadFile= async() =>{
+  
   if (!fileUpload) return;
   const filesFolderRef = ref(storage, `projectfiles/${fileUpload.name}`);
   try{
@@ -108,7 +126,8 @@ const uploadFile= async() =>{
       ))}
       </div>
       <div>
-        <input type="file" onChange = {(e)=> setFileUpload(e.target.files[0]) }/>
+        <input type="file" onChange = {(e)=>
+        { if (e.target.files!= null) setFileUpload(e.target.files[0]) }}/>
         <button onClick={uploadFile}>upload file</button>
       </div>
     
